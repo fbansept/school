@@ -1,5 +1,6 @@
 package edu.fbansept.school.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import edu.fbansept.school.view.ModuleView;
 import edu.fbansept.school.view.UserView;
@@ -15,7 +16,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class User {
+public class Module {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,25 +24,12 @@ public class User {
     private Integer id;
 
     @JsonView({UserView.class, ModuleView.class})
-    @Column(unique = true, nullable = false)
-    private String email;
+    private String name;
 
-    @Column(nullable = false)
-    private String password;
+    @JsonView(ModuleView.class)
+    private String description;
 
-    @ManyToOne
-    @JsonView(UserView.class)
-    private Role role;
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_module",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "module_id")
-    )
-    @JsonView(UserView.class)
-    private Set<Module> listModule = new HashSet<>();
-
-
-
+    @ManyToMany(mappedBy = "listModule")
+    @JsonView(ModuleView.class)
+    Set<User> listUser = new HashSet<>();
 }

@@ -1,20 +1,16 @@
 package edu.fbansept.school.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import edu.fbansept.school.dao.UserDao;
 import edu.fbansept.school.model.User;
+import edu.fbansept.school.view.UserView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @RestController
 public class UserController {
@@ -22,11 +18,13 @@ public class UserController {
     private UserDao userDao;
 
     @GetMapping("/users")
+    @JsonView(UserView.class)
     public List<User> getAllUser() {
         return userDao.findAll();
     }
 
     @GetMapping("/user/{id}")
+    @JsonView(UserView.class)
     public ResponseEntity<User> getUserById(@PathVariable int id) {
 
         Optional<User> user = userDao.findById(id);
@@ -53,19 +51,30 @@ public class UserController {
             if(userDatabase.isEmpty()){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+            //L'id est fourni et l'utilisateur existe, c'est donc un update
+            userDao.save(user);
+
+            return new ResponseEntity<>(user,HttpStatus.OK);
         }
 
+        //l'id n'est pas fourni c'est donc un CREATE
+        userDao.save(user);
 
-        return userDao.save(user);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/user/{id}")
-    public User deleteUser(@PathVariable int id) {
+    public ResponseEntity<User> deleteUser(@PathVariable int id) {
 
-        User user = userDao.findById(id).orElse(null);
+        Optional<User> user = userDao.findById(id);
+
+        if(user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         userDao.deleteById(id);
-        return user;
+
+        return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
 
