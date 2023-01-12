@@ -3,10 +3,16 @@ package edu.fbansept.school.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import edu.fbansept.school.dao.UserDao;
 import edu.fbansept.school.model.User;
+import edu.fbansept.school.security.JwtUtils;
+import edu.fbansept.school.security.MyUserDetails;
+import edu.fbansept.school.security.MyUserDetailsService;
 import edu.fbansept.school.view.UserView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +22,36 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private MyUserDetailsService myUserDetailsService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @GetMapping("/")
+    public String home() {
+        return "Le serveur marche bien, mais il n'y a rien a voir sur cette route :D";
+    }
+
+    @PostMapping("/connection")
+    public ResponseEntity<String> connection(@RequestBody User user) {
+
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    user.getEmail(), user.getPassword()
+            ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        MyUserDetails userDetails = (MyUserDetails) myUserDetailsService
+                .loadUserByUsername(user.getEmail());
+
+        return new ResponseEntity<>(jwtUtils.generateJwt(userDetails),HttpStatus.OK);
+    }
 
     @GetMapping("/users")
     @JsonView(UserView.class)
@@ -36,7 +72,7 @@ public class UserController {
         return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/user")
+    @PostMapping("/admin/user")
     public ResponseEntity<User> saveUser(@RequestBody User user) {
 
         //Si l'utilisateur fourni n'a pas toutes les informations
@@ -63,7 +99,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/admin/user/{id}")
     public ResponseEntity<User> deleteUser(@PathVariable int id) {
 
         Optional<User> user = userDao.findById(id);

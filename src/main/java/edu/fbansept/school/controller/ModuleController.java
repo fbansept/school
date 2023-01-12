@@ -36,7 +36,7 @@ public class ModuleController {
         return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/module")
+    @PostMapping("/admin/module")
     public ResponseEntity<Module> saveModule(@RequestBody Module module) {
 
         //Si l'utilisateur fourni n'a pas toutes les informations
@@ -63,7 +63,7 @@ public class ModuleController {
         return new ResponseEntity<>(module, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/module/{id}")
+    @DeleteMapping("/admin/module/{id}")
     public ResponseEntity<Module> deleteModule(@PathVariable int id) {
 
         Optional<Module> module = moduleDao.findById(id);

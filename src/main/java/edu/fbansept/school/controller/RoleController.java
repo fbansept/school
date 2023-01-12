@@ -32,7 +32,7 @@ public class RoleController {
         return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/role")
+    @PostMapping("/admin/role")
     public ResponseEntity<Role> saveRole(@RequestBody Role role) {
 
         //Si l'utilisateur fourni n'a pas toutes les informations
@@ -59,7 +59,7 @@ public class RoleController {
         return new ResponseEntity<>(role, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/role/{id}")
+    @DeleteMapping("/admin/role/{id}")
     public ResponseEntity<Role> deleteRole(@PathVariable int id) {
 
         Optional<Role> role = roleDao.findById(id);
