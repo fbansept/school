@@ -32,4 +32,7 @@ public class Module {
     @ManyToMany(mappedBy = "listModule")
     @JsonView(ModuleView.class)
     Set<User> listUser = new HashSet<>();
+
+    @ManyToOne
+    Administrateur referent;
 }

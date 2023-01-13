@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,9 @@ public class UserController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private PasswordEncoder encoder;
 
     @GetMapping("/")
     public String home() {
@@ -87,12 +92,14 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             //L'id est fourni et l'utilisateur existe, c'est donc un update
+            user.setPassword(userDatabase.get().getPassword());
             userDao.save(user);
 
             return new ResponseEntity<>(user,HttpStatus.OK);
         }
 
         //l'id n'est pas fourni c'est donc un CREATE
+        user.setPassword(encoder.encode(user.getPassword()));
         userDao.save(user);
 
         return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -109,7 +116,7 @@ public class UserController {
 
         userDao.deleteById(id);
 
-        return new ResponseEntity<>(user.get(), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

@@ -1,5 +1,7 @@
 package edu.fbansept.school.security;
 
+import edu.fbansept.school.model.Administrateur;
+import edu.fbansept.school.model.Role;
 import edu.fbansept.school.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,11 +23,25 @@ public class MyUserDetails implements UserDetails {
 
         Collection<GrantedAuthority> listAuthorities = new ArrayList<>();
 
+        if(this.user instanceof Administrateur) {
+            listAuthorities.add(
+                    new SimpleGrantedAuthority("ROLE_ADMINISTRATEUR")
+            );
+        }
+
         listAuthorities.add(
-                new SimpleGrantedAuthority(
-                        user.getRole() == null ? "ROLE_UTILISATEUR" : user.getRole().getName()
-                )
+                new SimpleGrantedAuthority("ROLE_UTILISATEUR")
         );
+
+//        for(Role role : this.user.getListRole()){
+//            listAuthorities.add(
+//                    new SimpleGrantedAuthority(role.getName())
+//            );
+//        }
+//
+//        listAuthorities.add(
+//                new SimpleGrantedAuthority("ROLE_UTLISATEUR")
+//        );
 
         return listAuthorities;
     }
