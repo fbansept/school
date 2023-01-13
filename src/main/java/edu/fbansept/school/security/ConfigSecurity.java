@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import javax.sql.DataSource;
 
@@ -21,6 +23,9 @@ public class ConfigSecurity extends WebSecurityConfigurerAdapter {
     @Autowired
     private MyUserDetailsService myUserDetailsService;
 
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(myUserDetailsService);
@@ -28,14 +33,19 @@ public class ConfigSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().cors().and()
-                .authorizeRequests()
+        http.csrf().disable()
+                .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+                .and().authorizeRequests()
                 .antMatchers("/connection").permitAll()
                 .antMatchers("/inscription").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMINISTRATEUR")
                 .antMatchers("/redact/**").hasAnyRole("ADMINISTRATEUR","REDACTEUR")
                 .antMatchers("/**").hasAnyRole("UTILISATEUR","ADMINISTRATEUR","REDACTEUR");
+
+        http.addFilterBefore(jwtRequestFilter,  UsernamePasswordAuthenticationFilter.class);
     }
+
+
 
     @Override
     @Bean

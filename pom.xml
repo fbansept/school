@@ -67,7 +67,33 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<id>Perso</id>
+			<properties>
+				<secret>azerty</secret>
+				<dbname>school</dbname>
+			</properties>
+		</profile>
+		<profile>
+			<id>Prod</id>
+			<properties>
+				<secret>azerty</secret>
+				<dbname>school_production</dbname>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
+		<resources>
+			<resource>
+				<filtering>true</filtering>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
